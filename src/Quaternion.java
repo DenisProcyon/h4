@@ -1,9 +1,15 @@
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /** Quaternions. Basic operations. */
 public class Quaternion {
 
-   // TODO!!! Your fields here!
+   double threshold = 0.001;
+   private double real_part;
+   private double im_i;
+   private double im_j;
+   private double im_k;
 
    /** Constructor from four double values.
     * @param a real part
@@ -12,35 +18,35 @@ public class Quaternion {
     * @param d imaginary part k
     */
    public Quaternion (double a, double b, double c, double d) {
-      // TODO!!! Your constructor here!
+      real_part = a;
+      im_i = b;
+      im_j = c;
+      im_k = d;
    }
 
    /** Real part of the quaternion.
     * @return real part
     */
    public double getRpart() {
-      return 0.; // TODO!!!
+      return real_part;
    }
 
-   /** Imaginary part i of the quaternion. 
-    * @return imaginary part i
-    */
    public double getIpart() {
-      return 0.; // TODO!!!
+      return im_i;
    }
 
    /** Imaginary part j of the quaternion. 
     * @return imaginary part j
     */
    public double getJpart() {
-      return 0.; // TODO!!!
+      return im_j;
    }
 
    /** Imaginary part k of the quaternion. 
     * @return imaginary part k
     */
    public double getKpart() {
-      return 0.; // TODO!!!
+      return im_k;
    }
 
    /** Conversion of the quaternion to the string.
@@ -50,7 +56,23 @@ public class Quaternion {
     */
    @Override
    public String toString() {
-      return ""; // TODO!!!
+      String a = String.format("%.2f", real_part);
+      String b = String.format("%.2fi", im_i);
+      String c = String.format("%.2fj", im_j);
+      String d = String.format("%.2fk", im_k);
+
+      if (im_i > 0) {
+         b = String.format("%.2fi", im_i);
+      }
+      if (im_j > 0) {
+         c = String.format("%.2fj", im_j);
+      }
+      if (im_k > 0) {
+         d = String.format("%.2fk", im_k);
+      }
+
+      System.out.println(a + b + c + d);
+      return a + b + c + d;
    }
 
    /** Conversion from the string to the quaternion. 
@@ -61,7 +83,24 @@ public class Quaternion {
     * @return a quaternion represented by string s
     */
    public static Quaternion valueOf (String s) {
-      return null; // TODO!!!
+      Pattern pattern = Pattern.compile("(-?\\d+(?:\\.\\d+)?)([ijk])?");
+      Matcher matcher = pattern.matcher(s);
+
+      double a = 0.0, b = 0.0, c = 0.0, d = 0.0;
+      while (matcher.find()) {
+         double value = Double.parseDouble(matcher.group(1));
+         String letter = matcher.group(2);
+         if (letter == null) {
+            a = value;
+         } else if (letter.equals("i")) {
+            b = value;
+         } else if (letter.equals("j")) {
+            c = value;
+         } else if (letter.equals("k")) {
+            d = value;
+         }
+      }
+      return new Quaternion(a, b, c, d);
    }
 
    /** Clone of the quaternion.
@@ -69,14 +108,21 @@ public class Quaternion {
     */
    @Override
    public Object clone() throws CloneNotSupportedException {
-      return null; // TODO!!!
+      Quaternion cloned = new Quaternion(real_part, im_i, im_j, im_k);
+
+      return cloned;
    }
 
    /** Test whether the quaternion is zero. 
     * @return true, if the real part and all the imaginary parts are (close to) zero
     */
    public boolean isZero() {
-      return false; // TODO!!!
+      if (Math.abs(real_part) < threshold && Math.abs(im_j) < threshold&& Math.abs(im_i) < threshold && Math.abs(im_k) < threshold){
+         return true;
+      }
+      else {
+         return false;
+      }
    }
 
    /** Conjugate of the quaternion. Expressed by the formula 
@@ -84,7 +130,9 @@ public class Quaternion {
     * @return conjugate of <code>this</code>
     */
    public Quaternion conjugate() {
-      return null; // TODO!!! 
+      Quaternion quat = new Quaternion(real_part, -im_i, -im_j, -im_k);
+
+      return quat;
    }
 
    /** Opposite of the quaternion. Expressed by the formula 
@@ -92,7 +140,9 @@ public class Quaternion {
     * @return quaternion <code>-this</code>
     */
    public Quaternion opposite() {
-      return null; // TODO!!!
+      Quaternion quat = new Quaternion(-real_part, -im_i, -im_j, -im_k);
+
+      return quat;
    }
 
    /** Sum of quaternions. Expressed by the formula 
@@ -101,7 +151,9 @@ public class Quaternion {
     * @return quaternion <code>this+q</code>
     */
    public Quaternion plus (Quaternion q) {
-      return null; // TODO!!!
+      Quaternion quat = new Quaternion(real_part + q.real_part, im_i + q.im_i, im_j+ q.im_j, im_k+ q.im_k);
+
+      return quat;
    }
 
    /** Product of quaternions. Expressed by the formula
@@ -111,7 +163,12 @@ public class Quaternion {
     * @return quaternion <code>this*q</code>
     */
    public Quaternion times (Quaternion q) {
-      return null; // TODO!!!
+      double r = real_part*q.real_part - im_i*q.im_i - im_j*q.im_j - im_k*q.im_k;
+      double i = real_part*q.im_i + im_i*q.real_part + im_j*q.im_k - im_k*q.im_j;
+      double j = real_part*q.im_j - im_i*q.im_k + im_j*q.real_part + im_k*q.im_i;
+      double k = real_part*q.im_k + im_i*q.im_j - im_j*q.im_i + im_k*q.real_part;
+
+      return new Quaternion(r, i, j, k);
    }
 
    /** Multiplication by a coefficient.
@@ -119,7 +176,9 @@ public class Quaternion {
     * @return quaternion <code>this*r</code>
     */
    public Quaternion times (double r) {
-      return null; // TODO!!!
+      Quaternion quat = new Quaternion(real_part * r, im_i * r, im_j * r, im_k * r);
+
+      return quat;
    }
 
    /** Inverse of the quaternion. Expressed by the formula
@@ -128,7 +187,13 @@ public class Quaternion {
     * @return quaternion <code>1/this</code>
     */
    public Quaternion inverse() {
-      return null; // TODO!!!
+      double num = real_part*real_part + im_i*im_i + im_j*im_j + im_k*im_k;
+      if (num != 0.0){
+         return new Quaternion(real_part*(1.0/num), -im_i*(1.0/num), -im_j*(1.0/num), -im_k*(1.0/num));
+      }
+      else {
+         throw new ArithmeticException("Square of quaternion equals 0!");
+      }
    }
 
    /** Difference of quaternions. Expressed as addition to the opposite.
@@ -136,49 +201,65 @@ public class Quaternion {
     * @return quaternion <code>this-q</code>
     */
    public Quaternion minus (Quaternion q) {
-      return null; // TODO!!!
+      Quaternion quat = new Quaternion(real_part - q.real_part, im_i - q.im_i, im_j - q.im_j, im_k - q.im_k);
+
+      return quat;
    }
 
-   /** Right quotient of quaternions. Expressed as multiplication to the inverse.
-    * @param q (right) divisor
-    * @return quaternion <code>this*inverse(q)</code>
-    */
+
    public Quaternion divideByRight (Quaternion q) {
-      return null; // TODO!!!
+      return times(q.inverse());
    }
 
-   /** Left quotient of quaternions.
-    * @param q (left) divisor
-    * @return quaternion <code>inverse(q)*this</code>
-    */
+   // Because 5 / 2 == 5 * 1/2 (it was pretty hard for me)
    public Quaternion divideByLeft (Quaternion q) {
-      return null; // TODO!!!
+      return q.inverse().times(this);
    }
    
-   /** Equality test of quaternions. Difference of equal numbers
-    *     is (close to) zero.
-    * @param qo second quaternion
-    * @return logical value of the expression <code>this.equals(qo)</code>
-    */
+
    @Override
    public boolean equals (Object qo) {
-      return false; // TODO!!!
+      if (!(qo instanceof Quaternion)) {
+         return false;
+      }
+      else{
+         if (this == qo){
+            return true;
+         }
+         else{
+            Quaternion a = (Quaternion) qo;
+            boolean result = Math.abs(real_part - a.real_part) <= threshold && Math.abs(im_i - a.im_i) <= threshold && Math.abs(im_k - a.im_k) <= threshold && Math.abs(im_j - a.im_j) <= threshold;
+            return  result;
+         }
+      }
    }
 
-   /** Dot product of quaternions. (p*conjugate(q) + q*conjugate(p))/2
-    * @param q factor
-    * @return dot product of this and q
-    */
+   //dotMult(p,q) = 1/2 * [(a+bi+cj+dk)(s−yi−zj−wk)+(s+yi+zj+wk)(a−bi−cj−dk)]
    public Quaternion dotMult (Quaternion q) {
-      return null; // TODO!!!
+      Quaternion conj_current = this.conjugate();
+      Quaternion conj_q = q.conjugate();
+
+      Quaternion first_part = this.times(conj_q);
+      Quaternion second_part = q.times(conj_current);
+
+      Quaternion result = first_part.plus(second_part).times(0.5);
+
+      return result;
    }
 
-   /** Integer hashCode has to be the same for equal objects.
-    * @return hashcode
-    */
+
+   // https://www.digitalocean.com/community/tutorials/java-equals-hashcode
    @Override
    public int hashCode() {
-      return 0; // TODO!!!
+      final int prime = 31;
+      int result = 0;
+
+      result = prime * result + Double.hashCode(im_i);
+      result = prime * result + Double.hashCode(im_j);
+      result = prime * result + Double.hashCode(im_k);
+      result = prime * result + Double.hashCode(real_part);
+
+      return result;
    }
 
    /** Norm of the quaternion. Expressed by the formula 
@@ -186,14 +267,24 @@ public class Quaternion {
     * @return norm of <code>this</code> (norm is a real number)
     */
    public double norm() {
-      return 0.; // TODO!!!
+      double result = Math.sqrt(real_part * real_part + im_i * im_i + im_j * im_j + im_k * im_k);
+
+      return  result;
    }
 
    /** Main method for testing purposes. 
-    * @param arg command line parameters
+    * @param args command line parameters
     */
    public static void main (String[] args) {
-      // TODO!!! Your example runs here
+      Quaternion q1 = new Quaternion(2, 2, 3, 4);
+      Quaternion q2 = new Quaternion(2, 2, 3, 4);
+
+      System.out.println(q1.norm());
+      System.out.println(q1.hashCode());
+      System.out.println(q2.hashCode());
+
+      //Quaternion result = q1.dotMult(q2);
+      //System.out.println(result.toString());
    }
 
 }
